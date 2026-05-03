@@ -4,9 +4,9 @@ class BST:
     def __init__(self):
         self.root = None
 
-    #Inserts a new gallery into the tree ps:exhibition_date removed for now — will be added back in v2 with MongoDB
-    def insert(self, name, neighborhood, art_style):
-        new_node = Node(name, neighborhood, art_style)
+    #Inserts a new gallery into the tree ps:exhibition_date removed for now
+    def insert(self, name, neighborhood, art_style, type, alias=None):
+        new_node = Node(name, neighborhood, art_style, type, alias)
         if self.root is None:
             self.root = new_node
         else:
@@ -35,6 +35,10 @@ class BST:
             return  None
         if name == current.name.lower():
             return current
+        # check alias
+        if current.alias:
+            if any(name == a.lower() for i in current.alias):
+                return current
         elif name < current.name.lower():
             return self._search_recursive(current.left, name)
         else:
