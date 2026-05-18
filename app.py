@@ -59,14 +59,17 @@ def load_styles():
 # ── search by name ────────────────────────────────────
 def search_by_name():
     name = entry_search.get()
-    result = tree.search(name)
     listbox_results.delete(0, tk.END)
     label_results_title.config(text="Search Result")
-    if result:
-        type_label = "🏛" if result.type == "museum" else "🖼"
-        listbox_results.insert(tk.END, f"{type_label} {result.name} — {result.neighborhood} — {', '.join(result.art_style)}")
+    if not name:
+        listbox_results.insert(tk.END, "Please insert a gallery name.")
     else:
-        listbox_results.insert(tk.END, "Gallery not found.")
+        result = tree.search(name)
+        if result:
+            type_label = "🏛" if result.type == "museum" else "🖼"
+            listbox_results.insert(tk.END, f"{type_label} {result.name} — {result.neighborhood} — {', '.join(result.art_style)}")
+        else:
+            listbox_results.insert(tk.END, "Gallery not found.")
     show_frame(frame_results)
 
 # ── list all ──────────────────────────────────────────
