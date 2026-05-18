@@ -6,13 +6,16 @@ def show_frame(frame):
     frame.tkraise()
 
 # ── results screen ───────────────────────────────────
-def show_results(results, title="Results"):
+def show_results(results, title="Results", show_neighborhood=True):
     label_results_title.config(text=title)
     listbox_results.delete(0, tk.END)
     if results:
         for g in results:
             type_label = "🏛" if g.type == "museum" else "🖼"
-            listbox_results.insert(tk.END, f"{type_label} {g.name} — {g.neighborhood}")
+            if show_neighborhood:
+                listbox_results.insert(tk.END, f"{type_label} {g.name} — {g.neighborhood}")
+            else:
+                listbox_results.insert(tk.END, f"{type_label} {g.name}")
     else:
         listbox_results.insert(tk.END, "No results found.")
     show_frame(frame_results)
@@ -30,8 +33,9 @@ def load_neighborhoods():
             width=30,
             command=lambda n=neighborhood: show_results(
                 [g for g in tree.list_all() if g.neighborhood == n],
-                title=f"Galleries in {n}"
-            )
+                title=f"Galleries in {n}" ,
+                show_neighborhood = False
+        )
         ).pack(pady=3)
     tk.Button(frame_neighborhoods, text="← Back", command=lambda: show_frame(frame_home)).pack(pady=20)
 
