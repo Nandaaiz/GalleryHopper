@@ -1,79 +1,118 @@
 import tkinter as tk
 from main import tree
 
-def show_results(results):
-    text_results.delete("1.0", tk.END)
+# ── helper ──────────────────────────────────────────
+def show_frame(frame):
+    frame.tkraise()
+
+# ── results screen ───────────────────────────────────
+def show_results(results, title="Results"):
+    label_results_title.config(text=title)
+    listbox_results.delete(0, tk.END)
     if results:
         for g in results:
-            text_results.insert(tk.END, f"{g.name} - {g.neighborhood} - {', '.join(g.art_style)}\n")
+            type_label = "🏛" if g.type == "museum" else "🖼"
+            listbox_results.insert(tk.END, f"{type_label} {g.name} — {g.neighborhood}")
     else:
-        text_results.insert(tk.END, "No galleries found.")
+        listbox_results.insert(tk.END, "No results found.")
+    show_frame(frame_results)
 
+# ── neighborhoods screen ─────────────────────────────
+def load_neighborhoods():
+    neighborhoods = sorted(set(g.neighborhood for g in tree.list_all()))
+    for widget in frame_neighborhoods.winfo_children():
+        widget.destroy()
+    tk.Label(frame_neighborhoods, text="Choose a Neighborhood").pack(pady=20)
+    for neighborhood in neighborhoods:
+        tk.Button(
+            frame_neighborhoods,
+            text=neighborhood,
+            width=30,
+            command=lambda n=neighborhood: show_results(
+                [g for g in tree.list_all() if g.neighborhood == n],
+                title=f"Galleries in {n}"
+            )
+        ).pack(pady=3)
+    tk.Button(frame_neighborhoods, text="← Back", command=lambda: show_frame(frame_home)).pack(pady=20)
+
+# ── styles screen ─────────────────────────────────────
+def load_styles():
+    styles = set()
+    for g in tree.list_all():
+        for s in g.art_style:
+            styles.add(s)
+    for widget in frame_styles.winfo_children():
+        widget.destroy()
+    tk.Label(frame_styles, text="Choose an Art Style").pack(pady=20)
+    for style in sorted(styles):
+        tk.Button(
+            frame_styles,
+            text=style,
+            width=30,
+            command=lambda s=style: show_results(
+                [g for g in tree.list_all() if s.lower() in [x.lower() for x in g.art_style]],
+                title=f"Galleries — {s}"
+            )
+        ).pack(pady=2)
+    tk.Button(frame_styles, text="← Back", command=lambda: show_frame(frame_home)).pack(pady=20)
+
+# ── search by name ────────────────────────────────────
 def search_by_name():
     name = entry_search.get()
     result = tree.search(name)
-    text_results.delete("1.0", tk.END)
+    listbox_results.delete(0, tk.END)
+    label_results_title.config(text="Search Result")
     if result:
-        text_results.insert(tk.END, f"{result.name} - {result.neighborhood} - {', '.join(result.art_style)}\n")
+        type_label = "🏛" if result.type == "museum" else "🖼"
+        listbox_results.insert(tk.END, f"{type_label} {result.name} — {result.neighborhood} — {', '.join(result.art_style)}")
     else:
-        text_results.insert(tk.END, "Gallery not found.")
+        listbox_results.insert(tk.END, "Gallery not found.")
+    show_frame(frame_results)
 
-def filter_by_neighborhood():
-    neighborhood = entry_search.get()
-    results = [g for g in tree.list_all() if g.neighborhood.lower() == neighborhood.lower()]
-    show_results(results)
-
-def filter_by_art_style():
-    style = entry_search.get()
-    results = [g for g in tree.list_all() if style.lower() in [s.lower() for s in g.art_style]]
-    show_results(results)
-
+# ── list all ──────────────────────────────────────────
 def list_all():
-    show_results(tree.list_all())
+    show_results(tree.list_all(), title="All Galleries & Museums")
 
-def show_all_styles():
-    styles = set()
-    for g in tree.list_all():
-        for style in g.art_style:
-            styles.add(style)
-    text_results.delete("1.0", tk.END)
-    for i, style in enumerate(sorted(styles), 1):
-        text_results.insert(tk.END, f"{i}. {style}\n")
-
-# Window
+# ── window setup ─────────────────────────────────────
 window = tk.Tk()
 window.title("GalleryHopper")
 window.geometry("800x600")
 
-# Title
-label_title = tk.Label(window, text="GalleryHopper")
-label_title.pack(pady=20)
+for f in range(4):
+    window.grid_rowconfigure(0, weight=1)
+    window.grid_columnconfigure(0, weight=1)
 
-label_subtitle = tk.Label(window, text="Find art galleries in NYC")
-label_subtitle.pack()
+# ── frames ────────────────────────────────────────────
+frame_home          = tk.Frame(window)
+frame_neighborhoods = tk.Frame(window)
+frame_styles        = tk.Frame(window)
+frame_results       = tk.Frame(window)
 
-# Search field
-entry_search = tk.Entry(window, width=40)
+for frame in (frame_home, frame_neighborhoods, frame_styles, frame_results):
+    frame.grid(row=0, column=0, sticky="nsew")
+
+# ── home screen ───────────────────────────────────────
+tk.Label(frame_home, text="GalleryHopper", font=("Helvetica", 24, "bold")).pack(pady=20)
+tk.Label(frame_home, text="Find art galleries in NYC").pack()
+
+entry_search = tk.Entry(frame_home, width=40)
 entry_search.pack(pady=10)
 
-# Buttons
-btn_search = tk.Button(window, text="Search by Name", width=30, command=search_by_name)
-btn_search.pack(pady=5)
+tk.Button(frame_home, text="Search by Name", width=30, command=search_by_name).pack(pady=5)
+tk.Button(frame_home, text="Filter by Neighborhood", width=30, command=lambda: [load_neighborhoods(), show_frame(frame_neighborhoods)]).pack(pady=5)
+tk.Button(frame_home, text="Filter by Art Style", width=30, command=lambda: [load_styles(), show_frame(frame_styles)]).pack(pady=5)
+tk.Button(frame_home, text="List All Galleries", width=30, command=list_all).pack(pady=5)
+tk.Button(frame_home, text="Exit", width=30, command=window.quit).pack(pady=20)
 
-btn_neighborhood = tk.Button(window, text="Filter by Neighborhood", width=30, command=filter_by_neighborhood)
-btn_neighborhood.pack(pady=5)
+# ── results screen widgets ────────────────────────────
+label_results_title = tk.Label(frame_results, text="Results", font=("Helvetica", 16, "bold"))
+label_results_title.pack(pady=10)
 
-btn_style = tk.Button(window, text="Filter by Art Style", width=30, command=filter_by_art_style)
-btn_style.pack(pady=5)
+listbox_results = tk.Listbox(frame_results, width=80, height=20)
+listbox_results.pack(pady=10)
 
-btn_all = tk.Button(window, text="List All Galleries", width=30, command=list_all)
-btn_all.pack(pady=5)
+tk.Button(frame_results, text="← Back to Home", command=lambda: show_frame(frame_home)).pack(pady=10)
 
-btn_styles = tk.Button(window, text="Show All Art Styles", width=30, command=show_all_styles)
-btn_styles.pack(pady=5)
-
-# Results area
-text_results = tk.Text(window, width=80, height=15)
-text_results.pack(pady=10)
-
+# ── start ─────────────────────────────────────────────
+show_frame(frame_home)
 window.mainloop()

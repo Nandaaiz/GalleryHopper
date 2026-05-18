@@ -57,8 +57,8 @@ def load_data(tree):
     tree.insert("Mrs.", "Queens", ["Contemporary", "Painting"], "gallery")
     tree.insert("Culture Lab LIC", "Queens", ["Community Art", "Contemporary"], "gallery")
 
-    # Meatpacking — museums
-    tree.insert("Whitney Museum of American Art", "Meatpacking",
+    # West Village — museums
+    tree.insert("Whitney Museum of American Art", "West Village",
                 ["American Art", "Contemporary", "Abstract Expressionism", "Pop Art"], "museum",
                 ["Whitney", "Whitney Museum"])
 
