@@ -13,7 +13,8 @@ def setup_details(frame, gallery, show_results):
     scroll_frame = tk.Frame(canvas, bg=COLOR_BG)
 
     scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+    scroll_frame.configure(width=600)
+    canvas.create_window((400, 0), window=scroll_frame, anchor="n")
     canvas.configure(yscrollcommand=scrollbar.set)
 
     canvas.pack(side="left", fill="both", expand=True, padx=40)

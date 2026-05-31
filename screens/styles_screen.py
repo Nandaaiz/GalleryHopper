@@ -29,7 +29,8 @@ def setup_styles(frame, tree, show_results, show_home):
         btn.create_text(150, 18, text=style, fill=COLOR_TEXT, font=BODY_FONT)
         btn.bind("<Button-1>", lambda e, s=style: show_results(
             [g for g in tree.list_all() if s.lower() in [x.lower() for x in g.art_style]],
-            title=f"Galleries — {s}"
+            title=f"Galleries — {s}",
+            back_command=lambda: show_home()
         ))
         btn.bind("<Enter>", lambda e, b=btn, r=rect: b.itemconfig(r, fill=COLOR_ACCENT_LT, outline=COLOR_ACCENT))
         btn.bind("<Leave>", lambda e, b=btn, r=rect: b.itemconfig(r, fill=COLOR_WHITE, outline=COLOR_BORDER))

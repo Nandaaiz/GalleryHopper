@@ -27,7 +27,8 @@ def setup_neighborhoods(frame, tree, show_results, show_home):
         btn.bind("<Button-1>", lambda e, n=neighborhood: show_results(
             [g for g in tree.list_all() if g.neighborhood == n],
             title=f"Galleries in {n}",
-            show_neighborhood=False
+            show_neighborhood=False,
+            back_command=lambda: show_home()
         ))
         btn.bind("<Enter>", lambda e, b=btn, r=rect: b.itemconfig(r, fill=COLOR_ACCENT_LT, outline=COLOR_ACCENT))
         btn.bind("<Leave>", lambda e, b=btn, r=rect: b.itemconfig(r, fill=COLOR_WHITE, outline=COLOR_BORDER))

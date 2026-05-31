@@ -35,9 +35,17 @@ def show_details(gallery):
     setup_details(frame_details, gallery, lambda: show_frame(frame_results))
     show_frame(frame_details)
 
+# ── set back command ──────────────────────────────────
+def set_back_command(command):
+    back_btn.bind("<Button-1>", lambda e: command())
+
 # ── show results ──────────────────────────────────────
-def show_results(results, title="Results", show_neighborhood=True):
+def show_results(results, title="Results", show_neighborhood=True, back_command=None):
     label_results_title.config(text=title)
+    if back_command:
+        set_back_command(back_command)
+    else:
+        set_back_command(lambda: show_frame(frame_home))
     for widget in scroll_frame.winfo_children():
         widget.destroy()
     if results:
@@ -50,13 +58,14 @@ def show_results(results, title="Results", show_neighborhood=True):
             tk.Label(item_frame, text=type_label, font=SMALL_FONT, bg=COLOR_WHITE, fg=COLOR_ACCENT).pack(anchor="w", padx=16)
             tk.Label(item_frame, text=g.name, font=SUBHEAD_FONT, bg=COLOR_WHITE, fg=COLOR_TEXT).pack(anchor="w", padx=16)
             if show_neighborhood:
-                tk.Label(item_frame, text=g.neighborhood, font=DETAIL_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY).pack(anchor="w", padx=16, pady=(0,8))
+                tk.Label(item_frame, text=g.neighborhood, font=DETAIL_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY).pack(anchor="w", padx=16, pady=(0, 8))
             item_frame.bind("<Button-1>", lambda e, gallery=g: show_details(gallery))
             for child in item_frame.winfo_children():
                 child.bind("<Button-1>", lambda e, gallery=g: show_details(gallery))
     else:
         tk.Label(scroll_frame, text="No results found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=20)
     show_frame(frame_results)
+
 # ── search by name ────────────────────────────────────
 def search_by_name():
     name = entry_search.get()
@@ -106,7 +115,7 @@ setup_home(
     window.quit
 )
 
-label_results_title, scroll_frame = setup_results(
+label_results_title, scroll_frame, back_btn = setup_results(
     frame_results,
     lambda: show_frame(frame_home)
 )
