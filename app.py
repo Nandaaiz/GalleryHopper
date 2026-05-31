@@ -44,9 +44,9 @@ def show_results(results, title="Results", show_neighborhood=True):
         for i, g in enumerate(results):
             type_label = "🏛 Museum" if g.type == "museum" else "🖼 Gallery"
             item_frame = tk.Frame(scroll_frame, bg=COLOR_WHITE, pady=12)
-            item_frame.grid(row=i//2, column=i%2, pady=4, padx=4, sticky="nsew")
-            scroll_frame.grid_columnconfigure(0, weight=1)
-            scroll_frame.grid_columnconfigure(1, weight=1)
+            item_frame.grid(row=i // 2, column=i % 2, pady=4, padx=20, sticky="nsew")
+            scroll_frame.grid_columnconfigure(0, weight=1, minsize=200)
+            scroll_frame.grid_columnconfigure(1, weight=1, minsize=200)
             tk.Label(item_frame, text=type_label, font=SMALL_FONT, bg=COLOR_WHITE, fg=COLOR_ACCENT).pack(anchor="w", padx=16)
             tk.Label(item_frame, text=g.name, font=SUBHEAD_FONT, bg=COLOR_WHITE, fg=COLOR_TEXT).pack(anchor="w", padx=16)
             if show_neighborhood:
