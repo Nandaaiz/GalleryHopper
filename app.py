@@ -69,11 +69,14 @@ def show_results(results, title="Results", show_neighborhood=True, back_command=
 # ── search by name ────────────────────────────────────
 def search_by_name():
     name = entry_search.get()
-    if not name:
+    if not name or name == "Search by gallery name.":
         show_results([], title="Search Result")
         for widget in scroll_frame.winfo_children():
             widget.destroy()
-        tk.Label(scroll_frame, text="Please insert a gallery name.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=20)
+        msg_frame = tk.Frame(scroll_frame, bg=COLOR_BG, width=600)
+        msg_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+        msg_frame.grid_columnconfigure(0, weight=1)
+        tk.Label(msg_frame, text="Please insert a gallery name.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=40)
         show_frame(frame_results)
     else:
         result = tree.search(name)
@@ -83,9 +86,11 @@ def search_by_name():
             show_results([], title="Search Result")
             for widget in scroll_frame.winfo_children():
                 widget.destroy()
-            tk.Label(scroll_frame, text="Gallery not found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=20)
+            msg_frame = tk.Frame(scroll_frame, bg=COLOR_BG, width=600)
+            msg_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+            msg_frame.grid_columnconfigure(0, weight=1)
+            tk.Label(msg_frame, text="Gallery not found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=40)
             show_frame(frame_results)
-
 # ── list all ──────────────────────────────────────────
 def list_all():
     show_results(tree.list_all(), title="All Galleries & Museums")
@@ -99,7 +104,22 @@ def load_styles():
     setup_styles(frame_styles, tree, show_results, lambda: show_frame(frame_home))
 
 # ── entry search ──────────────────────────────────────
-entry_search = tk.Entry(frame_home, width=40)
+entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, relief="solid", bd=1)
+entry_search.insert(0, "Search by gallery name...")
+entry_search.config(fg=COLOR_GRAY)
+
+def on_entry_click(e):
+    if entry_search.get() == "Search by gallery name...":
+        entry_search.delete(0, tk.END)
+        entry_search.config(fg=COLOR_TEXT)
+
+def on_focus_out(e):
+    if entry_search.get() == "":
+        entry_search.insert(0, "Search by gallery name...")
+        entry_search.config(fg=COLOR_GRAY)
+
+entry_search.bind("<FocusIn>", on_entry_click)
+entry_search.bind("<FocusOut>", on_focus_out)
 entry_search.bind("<Return>", lambda e: search_by_name())
 
 # ── setup screens ─────────────────────────────────────
