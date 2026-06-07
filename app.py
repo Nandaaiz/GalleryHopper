@@ -5,6 +5,8 @@ from screens.results import setup_results
 from screens.details import setup_details
 from screens.neighborhoods import setup_neighborhoods
 from screens.styles_screen import setup_styles
+from screens.login import setup_login
+from screens.register import setup_register
 import queries
 
 # ── window setup ─────────────────────────────────────
@@ -17,14 +19,19 @@ window.grid_rowconfigure(0, weight=1)
 window.grid_columnconfigure(0, weight=1)
 
 # ── frames ────────────────────────────────────────────
+frame_login         = tk.Frame(window, bg=COLOR_BG)
+frame_register      = tk.Frame(window, bg=COLOR_BG)
 frame_home          = tk.Frame(window, bg=COLOR_BG)
 frame_neighborhoods = tk.Frame(window, bg=COLOR_BG)
 frame_styles        = tk.Frame(window, bg=COLOR_BG)
 frame_results       = tk.Frame(window, bg=COLOR_BG)
 frame_details       = tk.Frame(window, bg=COLOR_BG)
 
-for frame in (frame_home, frame_neighborhoods, frame_styles, frame_results, frame_details):
+for frame in (frame_login, frame_register, frame_home, frame_neighborhoods, frame_styles, frame_results, frame_details):
     frame.grid(row=0, column=0, sticky="nsew")
+
+# ── current user ──────────────────────────────────────
+current_user = {}
 
 # ── helper ────────────────────────────────────────────
 def show_frame(frame):
@@ -99,7 +106,9 @@ def load_styles():
     setup_styles(frame_styles, queries.get_all_styles(), show_results, lambda: show_frame(frame_home))
 
 # ── entry search ──────────────────────────────────────
-entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY, relief="flat", bd=0, highlightthickness=0, insertbackground=COLOR_TEXT, justify="center")
+entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY,
+                        relief="flat", bd=0, highlightthickness=0,
+                        insertbackground=COLOR_TEXT, justify="center")
 entry_search.insert(0, "Search by gallery name...")
 
 def on_entry_click(e):
@@ -115,6 +124,17 @@ def on_focus_out(e):
 entry_search.bind("<FocusIn>", on_entry_click)
 entry_search.bind("<FocusOut>", on_focus_out)
 entry_search.bind("<Return>", lambda e: search_by_name())
+
+# ── setup login/register ──────────────────────────────
+def go_to_home(user):
+    current_user.update(user)
+    show_frame(frame_home)
+
+setup_login(
+    frame_login,
+    show_home=go_to_home,
+    show_register=lambda: setup_register(frame_register, show_login=lambda: show_frame(frame_login)) or show_frame(frame_register)
+)
 
 # ── setup screens ─────────────────────────────────────
 setup_home(
@@ -134,6 +154,6 @@ label_results_title, scroll_frame, back_btn = setup_results(
     lambda: show_frame(frame_home)
 )
 
-# ── start ─────────────────────────────────────────────
-show_frame(frame_home)
+# ── start — abre na tela de login ─────────────────────
+show_frame(frame_login)
 window.mainloop()
