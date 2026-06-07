@@ -39,7 +39,7 @@ def show_frame(frame):
 
 # ── show details ──────────────────────────────────────
 def show_details(gallery):
-    setup_details(frame_details, gallery, lambda: show_frame(frame_results))
+    setup_details(frame_details, gallery, lambda: show_frame(frame_results), current_user)
     show_frame(frame_details)
 
 # ── set back command ──────────────────────────────────

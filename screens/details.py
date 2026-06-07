@@ -1,7 +1,7 @@
 import tkinter as tk
 from styles import *
 
-def setup_details(frame, gallery, show_results):
+def setup_details(frame, gallery, show_results, current_user={}):
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -51,6 +51,25 @@ def setup_details(frame, gallery, show_results):
     tk.Label(scroll_frame, text="No information available at the moment.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(anchor="w")
 
     tk.Frame(scroll_frame, height=1, bg=COLOR_BORDER).pack(fill="x", pady=16)
+
+    tk.Frame(scroll_frame, height=1, bg=COLOR_BORDER).pack(fill="x", pady=8)
+
+    # Mark as visited button
+    def mark_visited():
+        if current_user.get("email"):
+            from user import user_manager
+            user_manager.add_to_visited(current_user["email"], gallery.get("name"))
+            visited_btn.itemconfig(visited_rect, fill=COLOR_ACCENT)
+            visited_btn.itemconfig(visited_text, fill="white", text="✓ Visited!")
+
+    visited_btn = tk.Canvas(scroll_frame, width=200, height=36, bg=COLOR_BG, highlightthickness=0)
+    visited_rect = visited_btn.create_rectangle(0, 0, 200, 36, fill=COLOR_WHITE, outline=COLOR_BORDER)
+    visited_text = visited_btn.create_text(100, 18, text="Mark as Visited", fill=COLOR_TEXT, font=SMALL_FONT)
+    visited_btn.bind("<Button-1>", lambda e: mark_visited())
+    visited_btn.bind("<Enter>",
+                     lambda e: visited_btn.itemconfig(visited_rect, fill=COLOR_ACCENT_LT, outline=COLOR_ACCENT))
+    visited_btn.bind("<Leave>", lambda e: visited_btn.itemconfig(visited_rect, fill=COLOR_WHITE, outline=COLOR_BORDER))
+    visited_btn.pack(anchor="w", pady=(0, 8))
 
     back_btn = tk.Canvas(scroll_frame, width=200, height=36, bg=COLOR_BG, highlightthickness=0)
     rect = back_btn.create_rectangle(0, 0, 200, 36, fill=COLOR_WHITE, outline=COLOR_BORDER)
