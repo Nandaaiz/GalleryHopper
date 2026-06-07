@@ -1,7 +1,7 @@
 import tkinter as tk
 from styles import *
 
-def setup_styles(frame, tree, show_results, show_home):
+def setup_styles(frame, styles, show_results, show_home):
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -18,17 +18,12 @@ def setup_styles(frame, tree, show_results, show_home):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    styles = set()
-    for g in tree.list_all():
-        for s in g.art_style:
-            styles.add(s)
-
-    for style in sorted(styles):
+    for style in styles:
         btn = tk.Canvas(scroll_frame, width=300, height=36, bg=COLOR_BG, highlightthickness=0)
         rect = btn.create_rectangle(0, 0, 300, 36, fill=COLOR_WHITE, outline=COLOR_BORDER)
         btn.create_text(150, 18, text=style, fill=COLOR_TEXT, font=BODY_FONT)
         btn.bind("<Button-1>", lambda e, s=style: show_results(
-            [g for g in tree.list_all() if s.lower() in [x.lower() for x in g.art_style]],
+            __import__('queries').filter_by_art_style(s),
             title=f"Galleries — {s}",
             back_command=lambda: show_home()
         ))

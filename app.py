@@ -1,11 +1,11 @@
 import tkinter as tk
-from main import tree
 from styles import *
 from screens.home import setup_home
 from screens.results import setup_results
 from screens.details import setup_details
 from screens.neighborhoods import setup_neighborhoods
 from screens.styles_screen import setup_styles
+import queries
 
 # ── window setup ─────────────────────────────────────
 window = tk.Tk()
@@ -50,73 +50,67 @@ def show_results(results, title="Results", show_neighborhood=True, back_command=
         widget.destroy()
     if results:
         for i, g in enumerate(results):
-            type_label = "🏛 Museum" if g.type == "museum" else "🖼 Gallery"
+            type_label = "🏛 Museum" if g.get("type") == "museum" else "🖼 Gallery"
             item_frame = tk.Frame(scroll_frame, bg=COLOR_WHITE, pady=12)
             item_frame.grid(row=i // 2, column=i % 2, pady=4, padx=20, sticky="nsew")
             scroll_frame.grid_columnconfigure(0, weight=1, minsize=200)
             scroll_frame.grid_columnconfigure(1, weight=1, minsize=200)
             tk.Label(item_frame, text=type_label, font=SMALL_FONT, bg=COLOR_WHITE, fg=COLOR_ACCENT).pack(anchor="w", padx=16)
-            tk.Label(item_frame, text=g.name, font=SUBHEAD_FONT, bg=COLOR_WHITE, fg=COLOR_TEXT).pack(anchor="w", padx=16)
+            tk.Label(item_frame, text=g.get("name"), font=SUBHEAD_FONT, bg=COLOR_WHITE, fg=COLOR_TEXT).pack(anchor="w", padx=16)
             if show_neighborhood:
-                tk.Label(item_frame, text=g.neighborhood, font=DETAIL_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY).pack(anchor="w", padx=16, pady=(0, 8))
+                tk.Label(item_frame, text=g.get("neighborhood"), font=DETAIL_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY).pack(anchor="w", padx=16, pady=(0, 8))
             item_frame.bind("<Button-1>", lambda e, gallery=g: show_details(gallery))
             for child in item_frame.winfo_children():
                 child.bind("<Button-1>", lambda e, gallery=g: show_details(gallery))
     else:
-        tk.Label(scroll_frame, text="No results found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=20)
+        tk.Label(scroll_frame, text="No results found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).grid(row=0, column=0, columnspan=2, pady=40)
     show_frame(frame_results)
 
 # ── search by name ────────────────────────────────────
 def search_by_name():
     name = entry_search.get()
-    if not name or name == "Search by gallery name.":
+    if not name or name == "Search by gallery name...":
         show_results([], title="Search Result")
         for widget in scroll_frame.winfo_children():
             widget.destroy()
-        msg_frame = tk.Frame(scroll_frame, bg=COLOR_BG, width=600)
-        msg_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-        msg_frame.grid_columnconfigure(0, weight=1)
-        tk.Label(msg_frame, text="Please insert a gallery name.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=40)
+        tk.Label(scroll_frame, text="Please insert a gallery name.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).grid(row=0, column=0, columnspan=2, pady=40)
         show_frame(frame_results)
     else:
-        result = tree.search(name)
+        result = queries.search_by_name(name)
         if result:
             show_results([result], title="Search Result")
         else:
             show_results([], title="Search Result")
             for widget in scroll_frame.winfo_children():
                 widget.destroy()
-            msg_frame = tk.Frame(scroll_frame, bg=COLOR_BG, width=600)
-            msg_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-            msg_frame.grid_columnconfigure(0, weight=1)
-            tk.Label(msg_frame, text="Gallery not found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=40)
+            tk.Label(scroll_frame, text="Gallery not found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).grid(row=0, column=0, columnspan=2, pady=40)
             show_frame(frame_results)
+
 # ── list all ──────────────────────────────────────────
 def list_all():
-    show_results(tree.list_all(), title="All Galleries & Museums")
+    show_results(queries.list_all(), title="All Galleries & Museums")
 
 # ── load neighborhoods ────────────────────────────────
 def load_neighborhoods():
-    setup_neighborhoods(frame_neighborhoods, tree, show_results, lambda: show_frame(frame_home))
+    setup_neighborhoods(frame_neighborhoods, queries.get_all_neighborhoods(), show_results, lambda: show_frame(frame_home))
 
 # ── load styles ───────────────────────────────────────
 def load_styles():
-    setup_styles(frame_styles, tree, show_results, lambda: show_frame(frame_home))
+    setup_styles(frame_styles, queries.get_all_styles(), show_results, lambda: show_frame(frame_home))
 
 # ── entry search ──────────────────────────────────────
-entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, relief="solid", bd=1)
+entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY, relief="flat", bd=0, highlightthickness=0, insertbackground=COLOR_TEXT, justify="center")
 entry_search.insert(0, "Search by gallery name...")
-entry_search.config(fg=COLOR_GRAY)
 
 def on_entry_click(e):
     if entry_search.get() == "Search by gallery name...":
         entry_search.delete(0, tk.END)
-        entry_search.config(fg=COLOR_TEXT)
+        entry_search.config(fg=COLOR_TEXT, bg=COLOR_WHITE)
 
 def on_focus_out(e):
     if entry_search.get() == "":
         entry_search.insert(0, "Search by gallery name...")
-        entry_search.config(fg=COLOR_GRAY)
+        entry_search.config(fg=COLOR_GRAY, bg=COLOR_WHITE)
 
 entry_search.bind("<FocusIn>", on_entry_click)
 entry_search.bind("<FocusOut>", on_focus_out)
