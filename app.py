@@ -7,6 +7,9 @@ from screens.neighborhoods import setup_neighborhoods
 from screens.styles_screen import setup_styles
 from screens.login import setup_login
 from screens.register import setup_register
+from screens.profile import setup_profile
+from session import save_session, load_session, clear_session
+from database import db
 import queries
 
 # ── window setup ─────────────────────────────────────
@@ -26,8 +29,9 @@ frame_neighborhoods = tk.Frame(window, bg=COLOR_BG)
 frame_styles        = tk.Frame(window, bg=COLOR_BG)
 frame_results       = tk.Frame(window, bg=COLOR_BG)
 frame_details       = tk.Frame(window, bg=COLOR_BG)
+frame_profile       = tk.Frame(window, bg=COLOR_BG)
 
-for frame in (frame_login, frame_register, frame_home, frame_neighborhoods, frame_styles, frame_results, frame_details):
+for frame in (frame_login, frame_register, frame_home, frame_neighborhoods, frame_styles, frame_results, frame_details, frame_profile):
     frame.grid(row=0, column=0, sticky="nsew")
 
 # ── current user ──────────────────────────────────────
@@ -105,6 +109,14 @@ def load_neighborhoods():
 def load_styles():
     setup_styles(frame_styles, queries.get_all_styles(), show_results, lambda: show_frame(frame_home))
 
+# ── load profile ──────────────────────────────────────
+def load_profile():
+    if current_user.get("email"):
+        setup_profile(frame_profile, current_user, lambda: show_frame(frame_home), show_results)
+        show_frame(frame_profile)
+    else:
+        show_frame(frame_login)
+
 # ── entry search ──────────────────────────────────────
 entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY,
                         relief="flat", bd=0, highlightthickness=0,
@@ -128,6 +140,8 @@ entry_search.bind("<Return>", lambda e: search_by_name())
 # ── setup login/register ──────────────────────────────
 def go_to_home(user):
     current_user.update(user)
+    if user.get("email"):
+        save_session(user["email"])
     show_frame(frame_home)
 
 setup_login(
@@ -146,7 +160,8 @@ setup_home(
     show_frame,
     frame_neighborhoods,
     frame_styles,
-    window.quit
+    window.quit,
+    load_profile
 )
 
 label_results_title, scroll_frame, back_btn = setup_results(
@@ -154,6 +169,17 @@ label_results_title, scroll_frame, back_btn = setup_results(
     lambda: show_frame(frame_home)
 )
 
-# ── start — abre na tela de login ─────────────────────
-show_frame(frame_login)
+# ── check existing session ────────────────────────────
+session = load_session()
+if session:
+    users_collection = db["users"]
+    user = users_collection.find_one({"email": session["email"]})
+    if user:
+        current_user.update(user)
+        show_frame(frame_home)
+    else:
+        show_frame(frame_login)
+else:
+    show_frame(frame_login)
+
 window.mainloop()

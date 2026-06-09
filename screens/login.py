@@ -53,3 +53,15 @@ def setup_login(frame, show_home, show_register):
     reg_btn.create_text(100, 15, text="Create account →", fill=COLOR_ACCENT, font=SMALL_FONT)
     reg_btn.bind("<Button-1>", lambda e: show_register())
     reg_btn.pack(pady=4)
+
+# Divider
+    tk.Frame(frame, height=1, bg=COLOR_BORDER).pack(fill="x", padx=100, pady=16)
+
+    # Guest button
+    guest_btn = tk.Canvas(frame, width=300, height=36, bg=COLOR_BG, highlightthickness=0)
+    rect_guest = guest_btn.create_rectangle(0, 0, 300, 36, fill=COLOR_WHITE, outline=COLOR_BORDER)
+    guest_btn.create_text(150, 18, text="Continue as Guest", fill=COLOR_GRAY, font=SMALL_FONT)
+    guest_btn.bind("<Button-1>", lambda e: show_home({"name": "Guest", "email": ""}))
+    guest_btn.bind("<Enter>", lambda e: guest_btn.itemconfig(rect_guest, fill=COLOR_ACCENT_LT, outline=COLOR_ACCENT))
+    guest_btn.bind("<Leave>", lambda e: guest_btn.itemconfig(rect_guest, fill=COLOR_WHITE, outline=COLOR_BORDER))
+    guest_btn.pack(pady=4)

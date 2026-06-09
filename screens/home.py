@@ -10,12 +10,12 @@ def make_button(parent, text, command, bg, fg, width=300):
     canvas.bind("<Leave>", lambda e: canvas.itemconfig(rect, fill=bg))
     return canvas
 
-def setup_home(frame, entry_search, load_neighborhoods, load_styles, list_all, show_frame, frame_neighborhoods, frame_styles, quit_app):
+def setup_home(frame, entry_search, load_neighborhoods, load_styles, list_all, show_frame, frame_neighborhoods, frame_styles, quit_app, load_profile=None):
 
     tk.Label(frame, text="GalleryHopper", font=TITLE_FONT, bg=COLOR_BG, fg=COLOR_TEXT).pack(pady=30)
     tk.Label(frame, text="Find art galleries in NYC", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(pady=4)
 
-    entry_search.configure(font=BODY_FONT, relief="solid", bd=1)
+    entry_search.configure(font=BODY_FONT, relief="flat", bd=0, highlightthickness=0)
     entry_search.pack(pady=20)
 
     make_button(frame, "List by Neighborhood", lambda: [load_neighborhoods(), show_frame(frame_neighborhoods)], "white", COLOR_TEXT).pack(pady=4)
