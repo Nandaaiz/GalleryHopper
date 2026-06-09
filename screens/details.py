@@ -69,10 +69,15 @@ def setup_details(frame, gallery, show_results, current_user={}):
             ex_frame = tk.Frame(scroll_frame, bg=COLOR_ACCENT_LT, pady=8)
             ex_frame.pack(fill="x", pady=4)
 
-            tk.Label(ex_frame, text=ex.get("title"), font=DETAIL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_TEXT, wraplength=500).pack(anchor="w", padx=12)
-            tk.Label(ex_frame, text=f"Artist: {ex.get('artist')}", font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_GRAY, wraplength=500).pack(anchor="w", padx=12)
-            tk.Label(ex_frame, text=f"{ex.get('date_start')} → {ex.get('date_end')}", font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_ACCENT).pack(anchor="w", padx=12, pady=(2, 0))
-
+            tk.Label(ex_frame, text=ex.get("title"), font=DETAIL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_TEXT,
+                     wraplength=500).pack(anchor="w", padx=12)
+            tk.Label(ex_frame, text=f"Artist: {ex.get('artist')}", font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_GRAY,
+                     wraplength=500).pack(anchor="w", padx=12)
+            tk.Label(ex_frame, text=f"{ex.get('date_start')} → {ex.get('date_end')}", font=SMALL_FONT,
+                     bg=COLOR_ACCENT_LT, fg=COLOR_ACCENT).pack(anchor="w", padx=12, pady=(2, 0))
+            if ex.get("description"):
+                tk.Label(ex_frame, text=ex.get("description"), font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_TEXT,
+                         wraplength=500).pack(anchor="w", padx=12, pady=(6, 0))
             # Mark exhibition as visited
             def mark_ex_visited(ex_title=ex.get("title")):
                 if current_user.get("email"):
