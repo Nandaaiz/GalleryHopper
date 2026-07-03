@@ -11,6 +11,9 @@ from screens.profile import setup_profile
 from session import save_session, load_session, clear_session
 from database import db
 import queries
+from screens.exhibition_details import setup_exhibition_details
+from screens.route_builder import setup_route_builder
+from screens.route_results import setup_route_results
 
 # ── window setup ─────────────────────────────────────
 window = tk.Tk()
@@ -30,8 +33,11 @@ frame_styles        = tk.Frame(window, bg=COLOR_BG)
 frame_results       = tk.Frame(window, bg=COLOR_BG)
 frame_details       = tk.Frame(window, bg=COLOR_BG)
 frame_profile       = tk.Frame(window, bg=COLOR_BG)
+frame_exhibition    = tk.Frame(window, bg=COLOR_BG)
+frame_route_builder = tk.Frame(window, bg=COLOR_BG)
+frame_route_results = tk.Frame(window, bg=COLOR_BG)
 
-for frame in (frame_login, frame_register, frame_home, frame_neighborhoods, frame_styles, frame_results, frame_details, frame_profile):
+for frame in (frame_login, frame_register, frame_home, frame_neighborhoods, frame_styles, frame_results, frame_details, frame_profile, frame_exhibition, frame_route_builder, frame_route_results):
     frame.grid(row=0, column=0, sticky="nsew")
 
 # ── current user ──────────────────────────────────────
@@ -43,8 +49,18 @@ def show_frame(frame):
 
 # ── show details ──────────────────────────────────────
 def show_details(gallery):
-    setup_details(frame_details, gallery, lambda: show_frame(frame_results), current_user)
+    setup_details(
+        frame_details,
+        gallery,
+        lambda: show_frame(frame_results),
+        current_user,
+        lambda ex: show_exhibition(ex, lambda: show_frame(frame_details))
+    )
     show_frame(frame_details)
+
+def show_exhibition(exhibition, back_to_gallery):
+    setup_exhibition_details(frame_exhibition, exhibition, back_to_gallery)
+    show_frame(frame_exhibition)
 
 # ── set back command ──────────────────────────────────
 def set_back_command(command):
@@ -97,6 +113,25 @@ def search_by_name():
             tk.Label(scroll_frame, text="Gallery not found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).grid(row=0, column=0, columnspan=2, pady=40)
             show_frame(frame_results)
 
+# ── route ────────────────────────────────────
+def load_route_builder():
+    setup_route_builder(frame_route_builder, queries.get_all_styles(), show_route_results, lambda: show_frame(frame_home))
+    show_frame(frame_route_builder)
+
+def show_route_results(selected_styles):
+    if not selected_styles:
+        return
+    seen = set()
+    galleries = []
+    for style in selected_styles:
+        for g in queries.filter_by_art_style(style):
+            name = g.get("name")
+            if name not in seen:
+                seen.add(name)
+                galleries.append(g)
+    setup_route_results(frame_route_results, selected_styles, galleries, lambda: show_frame(frame_home), show_details)
+    show_frame(frame_route_results)
+
 # ── list all ──────────────────────────────────────────
 def list_all():
     show_results(queries.list_all(), title="All Galleries & Museums")
@@ -144,12 +179,6 @@ def go_to_home(user):
         save_session(user["email"])
     show_frame(frame_home)
 
-setup_login(
-    frame_login,
-    show_home=go_to_home,
-    show_register=lambda: setup_register(frame_register, show_login=lambda: show_frame(frame_login)) or show_frame(frame_register)
-)
-
 # ── setup screens ─────────────────────────────────────
 setup_home(
     frame_home,
@@ -161,7 +190,8 @@ setup_home(
     frame_neighborhoods,
     frame_styles,
     window.quit,
-    load_profile
+    load_profile,
+    load_route_builder
 )
 
 label_results_title, scroll_frame, back_btn = setup_results(
@@ -169,17 +199,6 @@ label_results_title, scroll_frame, back_btn = setup_results(
     lambda: show_frame(frame_home)
 )
 
-# ── check existing session ────────────────────────────
-session = load_session()
-if session:
-    users_collection = db["users"]
-    user = users_collection.find_one({"email": session["email"]})
-    if user:
-        current_user.update(user)
-        show_frame(frame_home)
-    else:
-        show_frame(frame_login)
-else:
-    show_frame(frame_login)
-
+# ── start ─────────────────────────────────────────────
+show_frame(frame_home)
 window.mainloop()

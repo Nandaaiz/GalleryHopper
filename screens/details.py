@@ -2,7 +2,7 @@ import tkinter as tk
 from styles import *
 from exhibition import get_exhibitions_by_gallery
 
-def setup_details(frame, gallery, show_results, current_user={}):
+def setup_details(frame, gallery, show_results, current_user={}, show_exhibition=None):
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -71,36 +71,31 @@ def setup_details(frame, gallery, show_results, current_user={}):
 
             tk.Label(ex_frame, text=ex.get("title"), font=DETAIL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_TEXT,
                      wraplength=500).pack(anchor="w", padx=12)
-            tk.Label(ex_frame, text=f"Artist: {ex.get('artist')}", font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_GRAY,
-                     wraplength=500).pack(anchor="w", padx=12)
-            tk.Label(ex_frame, text=f"{ex.get('date_start')} → {ex.get('date_end')}", font=SMALL_FONT,
-                     bg=COLOR_ACCENT_LT, fg=COLOR_ACCENT).pack(anchor="w", padx=12, pady=(2, 0))
-            if ex.get("description"):
-                tk.Label(ex_frame, text=ex.get("description"), font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_TEXT,
-                         wraplength=500).pack(anchor="w", padx=12, pady=(6, 0))
-            # Mark exhibition as visited
-            def mark_ex_visited(ex_title=ex.get("title")):
-                if current_user.get("email"):
-                    from user import user_manager
-                    user_manager.add_to_visited(current_user["email"], ex_title)
-                    visited_label.config(text="✓ Marked as visited!", fg=COLOR_ACCENT)
-                else:
-                    visited_label.config(text="Create an account to use this feature!", fg=COLOR_GRAY)
 
-            visited_label = tk.Label(ex_frame, text="", font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_ACCENT)
-            visited_label.pack(anchor="w", padx=12)
+            if show_exhibition:
+                view_btn = tk.Label(ex_frame, text="View details →", font=SMALL_FONT, bg=COLOR_ACCENT_LT,
+                                    fg=COLOR_ACCENT, cursor="hand2")
+                view_btn.pack(anchor="w", padx=12, pady=(2, 0))
+                view_btn.bind("<Button-1>", lambda e, ex=ex: show_exhibition(ex))
+            # ── Mark as Visited (disabled for now) ───────────────
+            # def mark_ex_visited(ex_title=ex.get("title")):
+            #     if current_user.get("email"):
+            #         from user import user_manager
+            #         user_manager.add_to_visited(current_user["email"], ex_title)
+            #         visited_label.config(text="✓ Marked as visited!", fg=COLOR_ACCENT)
+            #     else:
+            #         visited_label.config(text="Create an account to use this feature!", fg=COLOR_GRAY)
 
-            mark_btn = tk.Canvas(ex_frame, width=180, height=28, bg=COLOR_ACCENT_LT, highlightthickness=0)
-            rect = mark_btn.create_rectangle(0, 0, 180, 28, fill=COLOR_WHITE, outline=COLOR_BORDER)
-            mark_btn.create_text(90, 14, text="Mark as Visited", fill=COLOR_TEXT, font=SMALL_FONT)
-            mark_btn.bind("<Button-1>", lambda e, t=ex.get("title"): mark_ex_visited(t))
-            mark_btn.bind("<Enter>", lambda e, b=mark_btn, r=rect: b.itemconfig(r, fill=COLOR_ACCENT_LT))
-            mark_btn.bind("<Leave>", lambda e, b=mark_btn, r=rect: b.itemconfig(r, fill=COLOR_WHITE))
-            mark_btn.pack(anchor="w", padx=12, pady=(4, 8))
-    else:
-        tk.Label(scroll_frame, text="No exhibitions available at the moment.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(anchor="w")
+            # visited_label = tk.Label(ex_frame, text="", font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_ACCENT)
+            # visited_label.pack(anchor="w", padx=12)
 
-    tk.Frame(scroll_frame, height=1, bg=COLOR_BORDER).pack(fill="x", pady=16)
+            # mark_btn = tk.Canvas(ex_frame, width=180, height=28, bg=COLOR_ACCENT_LT, highlightthickness=0)
+            # rect = mark_btn.create_rectangle(0, 0, 180, 28, fill=COLOR_WHITE, outline=COLOR_BORDER)
+            # mark_btn.create_text(90, 14, text="Mark as Visited", fill=COLOR_TEXT, font=SMALL_FONT)
+            # mark_btn.bind("<Button-1>", lambda e, t=ex.get("title"): mark_ex_visited(t))
+            # mark_btn.bind("<Enter>", lambda e, b=mark_btn, r=rect: b.itemconfig(r, fill=COLOR_ACCENT_LT))
+            # mark_btn.bind("<Leave>", lambda e, b=mark_btn, r=rect: b.itemconfig(r, fill=COLOR_WHITE))
+            # mark_btn.pack(anchor="w", padx=12, pady=(4, 8))
 
     # ── Back button ───────────────────────────────────
     back_btn = tk.Canvas(scroll_frame, width=200, height=36, bg=COLOR_BG, highlightthickness=0)
