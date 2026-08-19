@@ -64,9 +64,12 @@ def setup_exhibition_details(frame, exhibition, show_gallery, lang="EN"):
 
     # ── Description ───────────────────────────────────
     tk.Label(scroll_frame, text="ABOUT", font=SMALL_FONT, bg=COLOR_BG, fg=COLOR_GRAY).pack(anchor="w", pady=(8, 6))
-    description = exhibition.get("description", "No description available.")
-    tk.Label(scroll_frame, text=description, font=BODY_FONT, bg=COLOR_BG, fg=COLOR_TEXT, wraplength=560, justify="left").pack(anchor="w")
-
+    if lang == "PT" and exhibition.get("description_pt"):
+        description = exhibition.get("description_pt")
+    else:
+        description = exhibition.get("description", "No description available.")
+    tk.Label(scroll_frame, text=description, font=BODY_FONT, bg=COLOR_BG, fg=COLOR_TEXT, wraplength=560,
+             justify="left").pack(anchor="w")
     tk.Frame(scroll_frame, height=1, bg=COLOR_BORDER).pack(fill="x", pady=16)
 
     # ── Back button ───────────────────────────────────
