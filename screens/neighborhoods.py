@@ -1,7 +1,7 @@
 import tkinter as tk
 from styles import *
 
-def setup_neighborhoods(frame, neighborhoods, show_results, show_home):
+def setup_neighborhoods(frame, neighborhoods, show_results, show_home, city="New York"):
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -27,7 +27,7 @@ def setup_neighborhoods(frame, neighborhoods, show_results, show_home):
             rect = btn.create_rectangle(0, 0, 300, 36, fill=COLOR_WHITE, outline=COLOR_BORDER)
             btn.create_text(150, 18, text=neighborhood, fill=COLOR_TEXT, font=BODY_FONT)
             btn.bind("<Button-1>", lambda e, n=neighborhood: show_results(
-                __import__('queries').filter_by_neighborhood(n),
+                __import__('queries').filter_by_neighborhood(n, city),
                 title=f"Galleries in {n}",
                 show_neighborhood=False,
                 back_command=lambda: show_home()

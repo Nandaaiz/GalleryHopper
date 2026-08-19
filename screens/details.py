@@ -2,7 +2,7 @@ import tkinter as tk
 from styles import *
 from exhibition import get_exhibitions_by_gallery
 
-def setup_details(frame, gallery, show_results, current_user={}, show_exhibition=None):
+def setup_details(frame, gallery, show_results, current_user={}, show_exhibition=None, lang="EN"):
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -73,10 +73,19 @@ def setup_details(frame, gallery, show_results, current_user={}, show_exhibition
                      wraplength=500).pack(anchor="w", padx=12)
 
             if show_exhibition:
+                if lang == "PT" and ex.get("description_pt"):
+                    desc = ex.get("description_pt")
+                else:
+                    desc = ex.get("description", "")
+                if desc:
+                    tk.Label(ex_frame, text=desc, font=SMALL_FONT, bg=COLOR_ACCENT_LT, fg=COLOR_TEXT,
+                             wraplength=500).pack(anchor="w", padx=12, pady=(6, 0))
                 view_btn = tk.Label(ex_frame, text="View details →", font=SMALL_FONT, bg=COLOR_ACCENT_LT,
                                     fg=COLOR_ACCENT, cursor="hand2")
                 view_btn.pack(anchor="w", padx=12, pady=(2, 0))
                 view_btn.bind("<Button-1>", lambda e, ex=ex: show_exhibition(ex))
+
+
             # ── Mark as Visited (disabled for now) ───────────────
             # def mark_ex_visited(ex_title=ex.get("title")):
             #     if current_user.get("email"):

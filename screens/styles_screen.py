@@ -1,7 +1,7 @@
 import tkinter as tk
 from styles import *
 
-def setup_styles(frame, styles, show_results, show_home):
+def setup_styles(frame, styles, show_results, show_home, city="New York"):
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -23,7 +23,7 @@ def setup_styles(frame, styles, show_results, show_home):
         rect = btn.create_rectangle(0, 0, 300, 36, fill=COLOR_WHITE, outline=COLOR_BORDER)
         btn.create_text(150, 18, text=style, fill=COLOR_TEXT, font=BODY_FONT)
         btn.bind("<Button-1>", lambda e, s=style: show_results(
-            __import__('queries').filter_by_art_style(s),
+            __import__('queries').filter_by_art_style(s, city),
             title=f"Galleries — {s}",
             back_command=lambda: show_home()
         ))

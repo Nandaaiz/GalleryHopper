@@ -2,7 +2,7 @@ import tkinter as tk
 from styles import *
 from datetime import datetime
 
-def setup_exhibition_details(frame, exhibition, show_gallery):
+def setup_exhibition_details(frame, exhibition, show_gallery, lang="EN"):
     for widget in frame.winfo_children():
         widget.destroy()
 

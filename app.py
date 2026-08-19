@@ -43,6 +43,10 @@ for frame in (frame_login, frame_register, frame_home, frame_neighborhoods, fram
 # ── current user ──────────────────────────────────────
 current_user = {}
 
+# ── city and language ─────────────────────────────────
+current_city = {"value": "New York"}
+current_lang = {"value": "EN"}
+
 # ── helper ────────────────────────────────────────────
 def show_frame(frame):
     frame.tkraise()
@@ -54,12 +58,13 @@ def show_details(gallery):
         gallery,
         lambda: show_frame(frame_results),
         current_user,
-        lambda ex: show_exhibition(ex, lambda: show_frame(frame_details))
+        lambda ex: show_exhibition(ex, lambda: show_frame(frame_details)),
+        current_lang["value"]
     )
     show_frame(frame_details)
 
 def show_exhibition(exhibition, back_to_gallery):
-    setup_exhibition_details(frame_exhibition, exhibition, back_to_gallery)
+    setup_exhibition_details(frame_exhibition, exhibition, back_to_gallery, current_lang["value"])
     show_frame(frame_exhibition)
 
 # ── set back command ──────────────────────────────────
@@ -94,7 +99,7 @@ def show_results(results, title="Results", show_neighborhood=True, back_command=
     show_frame(frame_results)
 
 # ── search by name ────────────────────────────────────
-def search_by_name():
+def search_by_name(entry_search):
     name = entry_search.get()
     if not name or name == "Search by gallery name...":
         show_results([], title="Search Result")
@@ -113,9 +118,9 @@ def search_by_name():
             tk.Label(scroll_frame, text="Gallery not found.", font=BODY_FONT, bg=COLOR_BG, fg=COLOR_GRAY).grid(row=0, column=0, columnspan=2, pady=40)
             show_frame(frame_results)
 
-# ── route ────────────────────────────────────
+# ── route ─────────────────────────────────────────────
 def load_route_builder():
-    setup_route_builder(frame_route_builder, queries.get_all_styles(), show_route_results, lambda: show_frame(frame_home))
+    setup_route_builder(frame_route_builder, queries.get_all_styles(current_city["value"]), show_route_results, lambda: show_frame(frame_home))
     show_frame(frame_route_builder)
 
 def show_route_results(selected_styles):
@@ -124,7 +129,7 @@ def show_route_results(selected_styles):
     seen = set()
     galleries = []
     for style in selected_styles:
-        for g in queries.filter_by_art_style(style):
+        for g in queries.filter_by_art_style(style, current_city["value"]):
             name = g.get("name")
             if name not in seen:
                 seen.add(name)
@@ -134,15 +139,15 @@ def show_route_results(selected_styles):
 
 # ── list all ──────────────────────────────────────────
 def list_all():
-    show_results(queries.list_all(), title="All Galleries & Museums")
+    show_results(queries.list_all(current_city["value"]), title="All Galleries & Museums")
 
 # ── load neighborhoods ────────────────────────────────
 def load_neighborhoods():
-    setup_neighborhoods(frame_neighborhoods, queries.get_all_neighborhoods(), show_results, lambda: show_frame(frame_home))
+    setup_neighborhoods(frame_neighborhoods, queries.get_all_neighborhoods(current_city["value"]), show_results, lambda: show_frame(frame_home), current_city["value"])
 
 # ── load styles ───────────────────────────────────────
 def load_styles():
-    setup_styles(frame_styles, queries.get_all_styles(), show_results, lambda: show_frame(frame_home))
+    setup_styles(frame_styles, queries.get_all_styles(current_city["value"]), show_results, lambda: show_frame(frame_home), current_city["value"])
 
 # ── load profile ──────────────────────────────────────
 def load_profile():
@@ -152,46 +157,32 @@ def load_profile():
     else:
         show_frame(frame_login)
 
-# ── entry search ──────────────────────────────────────
-entry_search = tk.Entry(frame_home, width=40, font=BODY_FONT, bg=COLOR_WHITE, fg=COLOR_GRAY,
-                        relief="flat", bd=0, highlightthickness=0,
-                        insertbackground=COLOR_TEXT, justify="center")
-entry_search.insert(0, "Search by gallery name...")
+# ── city and lang setters ─────────────────────────────
+def set_city(city):
+    current_city["value"] = city
+    refresh_home()
 
-def on_entry_click(e):
-    if entry_search.get() == "Search by gallery name...":
-        entry_search.delete(0, tk.END)
-        entry_search.config(fg=COLOR_TEXT, bg=COLOR_WHITE)
+def set_lang(lang):
+    current_lang["value"] = lang
+    refresh_home()
 
-def on_focus_out(e):
-    if entry_search.get() == "":
-        entry_search.insert(0, "Search by gallery name...")
-        entry_search.config(fg=COLOR_GRAY, bg=COLOR_WHITE)
-
-entry_search.bind("<FocusIn>", on_entry_click)
-entry_search.bind("<FocusOut>", on_focus_out)
-entry_search.bind("<Return>", lambda e: search_by_name())
-
-# ── setup login/register ──────────────────────────────
-def go_to_home(user):
-    current_user.update(user)
-    if user.get("email"):
-        save_session(user["email"])
+def refresh_home():
+    setup_home(
+        frame_home, load_neighborhoods, load_styles,
+        list_all, show_frame, frame_neighborhoods, frame_styles,
+        window.quit, load_profile, load_route_builder,
+        current_city, current_lang, set_city, set_lang,
+        search_by_name
+    )
     show_frame(frame_home)
 
 # ── setup screens ─────────────────────────────────────
 setup_home(
-    frame_home,
-    entry_search,
-    load_neighborhoods,
-    load_styles,
-    list_all,
-    show_frame,
-    frame_neighborhoods,
-    frame_styles,
-    window.quit,
-    load_profile,
-    load_route_builder
+    frame_home, load_neighborhoods, load_styles,
+    list_all, show_frame, frame_neighborhoods, frame_styles,
+    window.quit, load_profile, load_route_builder,
+    current_city, current_lang, set_city, set_lang,
+    search_by_name
 )
 
 label_results_title, scroll_frame, back_btn = setup_results(
